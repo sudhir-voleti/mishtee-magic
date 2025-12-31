@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MishTee-Magic: Lec04 Logistics Pivot</title>
+    <style>
+        /* Embedded Caselet Style - ISB Blue & Orange Theme */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+            background-color: #fcfcfc;
+        }
+
+        h1, h2, h3 {
+            color: #003366; /* ISB Blue */
+            border-bottom: 2px solid #E37222; /* ISB Orange */
+            padding-bottom: 5px;
+            margin-top: 1.5em;
+        }
+
+        .section {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .memo {
+            background-color: #fff;
+            border-left: 4px solid #E37222;
+            padding: 15px;
+            margin: 20px 0;
+            font-style: italic;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: white;
+        }
+
+        th {
+            background-color: #003366;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 0.8em;
+            color: #777;
+            text-align: center;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>MishTee-Magic (Part B): The Delivery Mitra Integration</h1>
+
+    <div class="section">
+        <h2>Firm Context</h2>
+        <p>In Lec03, we successfully built a core DB-in-cloud solution for MishTee-Magic's data woes.</p>
+        <p>We further D-B-Ded the <b>cust view of the MishTee app</b> - the simplest of the 3 views we designed.</p>
+        <p>Time now to pivot to the <b>deliv-agent web-app view</b> wherein we wrestle with the logistical challenge of Ahmedabad's notoriously unpredictable traffic.</p>
+        <p>Q is "How do we ensure a "MishTee" treat arrives before it loses its crunch?"</p>
+        <p>MishTee has partnered with Delivery Mitra for hyperlocal logistics. Their agents need a dedicated view within our app to manage their routes.</p>
+        <p>Ask yourself, what minimal UI features would you expect in a deliv agent's app-view? Design always starts thus, only.</p>
+        <p>Turns out there's a <b>third-party Hyperlocal Traffic API</b> we'd have to integrate our app with to solve the traffic riddle, and obtain real-time congestion signals across the city. Forward, Ahoy!</p>
+    </div>
+
+ 
+
+<div class="memo">
+        <h3>Internal Memo</h3>
+        <p><strong>To:</strong> Product Lead (You)</p>
+        <p><strong>From:</strong> Anjali, CEO</p>
+        <p><strong>Subject:</strong> Delivery-Agent View Requirements</p>
+
+        <p>We need to empower our Delivery Mitra partners with a clear, efficient interface. I am looking for a Minimum Viable Product (MVP) for the agent view.</p>
+
+        <p>The interface must show:</p>
+        <ul>
+            <li>Secure <b>agent login</b> with their phone numbers</li>
+            <li><b>Orders assigned</b> to the agent</li>
+            <li>Precise <b>store locations</b> for pickups</li>
+            <li><b>Customer addresses</b> for delivery location</li>
+            <li><b>Cust phone numbers</b> for coordination if needed</li>
+            <li>A <b>Google Maps widget</b> displaying the pickup and drop-off locations</li>
+            <li>Show <b>traffic congestion status</b></li>
+            <li><b>Estimated delivery times</b> (ETD)</li>
+            <li>Ability to <b>update order status</b> from 'pending' to 'delivered'</li>
+        </ul>
+
+        <p>Well, yeah, that's quite a bit, I know. Still, we don't have the luxury of much time.</p>
+        <p>Can you pilot a quick prototype for this? Something we can later productize and deploy at scale.</p>
+    </div>
+
+
+
+
+
+    <div class="section">
+        <h2>Data Dictionary (Lec04 Updates)</h2>
+
+        <p>Time now pivot to the "Logistics-Ready" schema. 
+	<p>Below are highlighted the new fields added to support the Delivery Mitra integration.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Table</th>
+                    <th>Field (Variable)</th>
+                    <th>Data Type</th>
+                    <th>Description (Key/Role)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>stores</code></td>
+                    <td><code>store_lat</code></td>
+                    <td>Numeric (Dec)</td>
+                    <td style="color: #E37222;"><b>New</b>: Pickup latitude</td>
+                </tr>
+                <tr>
+                    <td><code>stores</code></td>
+                    <td><code>store_lon</code></td>
+                    <td>Numeric (Dec)</td>
+                    <td style="color: #E37222;"><b>New</b>: Pickup longitude</td>
+                </tr>
+                <tr style="border-top: 1px solid #ddd;">
+                    <td><code>customers</code></td>
+                    <td><code>cust_lat</code></td>
+                    <td>Numeric (Dec)</td>
+                    <td style="color: #E37222;"><b>New</b>: Drop-off latitude</td>
+                </tr>
+                <tr>
+                    <td><code>customers</code></td>
+                    <td><code>cust_lon</code></td>
+                    <td>Numeric (Dec)</td>
+                    <td style="color: #E37222;"><b>New</b>: Drop-off longitude</td>
+                </tr>
+                <tr>
+                    <td><code>customers</code></td>
+                    <td><code>phone_num</code></td>
+                    <td>Character</td>
+                    <td>Customer contact for agent</td>
+                </tr>
+                <tr style="border-top: 2px solid #003366; background-color: #eef2ff;">
+                    <td><code>traffic_api</code></td>
+                    <td><code>congestion_score</code></td>
+                    <td>Numeric (Int)</td>
+                    <td><b>API Signal</b>: Traffic intensity (1-10)</td>
+                </tr>
+                <tr style="background-color: #eef2ff;">
+                    <td><code>traffic_api</code></td>
+                    <td><code>etd_minutes</code></td>
+                    <td>Numeric (Int)</td>
+                    <td><b>API Signal</b>: Dynamic travel estimate</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <div class="section">
+        <h2>Appendix: Third-Party Traffic API Documentation (v1.2)</h2>
+        <p>We use the <i>HyperLocal-Traffic</i> service to pull real-time data. We now pivot to the technical specifications required for our integration.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Endpoint</th>
+                    <th>Method</th>
+                    <th>Required Inputs</th>
+                    <th>Principal Outputs</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>/get-congestion</code></td>
+                    <td>GET</td>
+                    <td><code>lat</code>, <code>lon</code></td>
+                    <td><code>congestion_score</code> (1-10)</td>
+                </tr>
+                <tr>
+                    <td><code>/get-etd</code></td>
+                    <td>GET</td>
+                    <td><code>origin_lat/lon</code>, <code>dest_lat/lon</code></td>
+                    <td><code>etd_minutes</code> (Int)</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>What would you like to see happen if the <code>etd_minutes</code> exceeds 60 minutes for a 5km trip?</p>
+    </div>
+
+
+
+    <div class="section">
+        <h2>Analysis Questions</h2>
+        <ol>
+            <li>
+                <strong>API Basics:</strong> We are calling a third-party API for traffic data. We are not storing this data in our DB. Why?
+                <textarea id="case-q1" placeholder="Type your thoughts..."></textarea>
+            </li>
+            <li>
+                <strong>Product Logic:</strong> If the Traffic API returns a congestion score of 10 (Gridlock), how should our app's UI respond to manage customer expectations?
+                <textarea id="case-q2" placeholder="Type your thoughts..."></textarea>
+            </li>
+        </ol>
+    </div>
+
+    <div class="footer">
+        <p>MishTee-Magic Lec04 | API Basics for Product Managers</p>
+    </div>
+
+</body>
+</html>
